@@ -9,6 +9,32 @@ const
 
 var logger* = newConsoleLogger(logLevel, verboseFmtStr)
 
+template runBasicSendRecv*[T](chan: Chan[T], count: int = 100) =
+
+  var dest = ""
+  for i in 1..count:
+    let msg = "Hello World! " & $i
+    logger.log(lvlDebug, "[main] Send msg: " & $msg)
+    chan.send(msg)
+
+    chan.recv(dest)
+    logger.log(lvlDebug, "[main] Received msg: " & $dest)
+  
+  doAssert dest == "Hello World! " & $count
+
+template runBasicSendRecvAll*[T](chan: Chan[T], count: int) =
+
+  for i in 1..count:
+    let msg = "Hello World! " & $i
+    logger.log(lvlDebug, "[main] Send msg: " & $msg)
+    chan.send(msg)
+
+  var dest: seq[string]
+  chan.recvAll(dest)
+  logger.log(lvlDebug, "[main] Received msg: " & $dest)
+  
+  doAssert dest[^1] == "Hello World! " & $count
+
 template runMultithreadInOrderTest*[T](chan: Chan[T]) =
   var worker1: Thread[void]
 

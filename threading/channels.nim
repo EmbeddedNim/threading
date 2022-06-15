@@ -387,6 +387,23 @@ proc recv*[T](c: Chan[T], dst: var T) {.inline.} =
   ## Receives item from the channel(blocking).
   discard channelReceive(c, dst.addr, sizeof(dst), false)
 
+proc recvAll*[T](c: Chan[T], dst: var seq[T]): int {.discardable.} =
+  ## Receives item from the channel(blocking).
+  dst.setLen(c.d.size)
+  for idx, item in dst.mpairs():
+    let res = tryRecv(c, item)
+    if not res:
+      result = idx
+      break
+  dst.setLen(result)
+
+proc recvAll*[T](c: Chan[T], dst: var openArray[T]): int {.discardable.} =
+  ## Receives item from the channel(blocking).
+  for idx, item in dst.mpairs():
+    let res = tryRecv(c, item)
+    if not res:
+      return idx
+
 proc recvIso*[T](c: Chan[T]): Isolated[T] {.inline.} =
   var dst: T
   discard channelReceive(c, dst.addr, sizeof(dst), false)

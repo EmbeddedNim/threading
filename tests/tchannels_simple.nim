@@ -21,6 +21,14 @@ suite "testing Chan with overwrite mode":
         let chan3 = chan0
         let chan4 = chan0
 
+  test "simple send recv":
+    var chan = newChan[string]()
+    runBasicSendRecv(chan)
+
+  test "simple send recvAll":
+    var chan = newChan[string]()
+    runBasicSendRecvAll(chan, 10)
+
   test "basic multithread":
     var chan = newChan[string]()
     runMultithreadInOrderTest(chan)
