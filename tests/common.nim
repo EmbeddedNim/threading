@@ -35,6 +35,17 @@ template runBasicSendRecvAll*[T](chan: Chan[T], count: int) =
   
   doAssert dest[^1] == "Hello World! " & $count
 
+template runBasicReset*[T](chan: Chan[T], count: int) =
+
+  for i in 1..count:
+    let msg = "Hello World! " & $i
+    logger.log(lvlDebug, "[main] Send msg: " & $msg)
+    chan.send(msg)
+
+  check chan.peek() == count
+  chan.reset()
+  check chan.peek() == 0
+
 template runMultithreadInOrderTest*[T](chan: Chan[T]) =
   var worker1: Thread[void]
 

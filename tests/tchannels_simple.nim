@@ -29,6 +29,10 @@ suite "testing Chan with overwrite mode":
     var chan = newChan[string]()
     runBasicSendRecvAll(chan, 10)
 
+  test "simple reset":
+    var chan = newChan[string]()
+    runBasicReset(chan, 10)
+
   test "basic multithread":
     var chan = newChan[string]()
     runMultithreadInOrderTest(chan)

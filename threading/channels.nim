@@ -326,11 +326,11 @@ proc recvMpmc(chan: ChannelRaw, data: pointer, size: int, nonBlocking: bool): bo
   result = true
 
 
-proc resetMpmc(chan: ChannelRaw, nonBlocking: bool): bool =
+proc resetMpmc(chan: ChannelRaw, nonBlocking: bool) =
   assert not chan.isNil
 
   if nonBlocking and chan.isEmpty:
-    return true
+    return
 
   acquire(chan.lock)
 
@@ -338,7 +338,6 @@ proc resetMpmc(chan: ChannelRaw, nonBlocking: bool): bool =
 
   release(chan.lock)
   signal(chan.notFullCond)
-  result = true
 
 # Public API
 # ----------------------------------------------------------------------------------
@@ -436,7 +435,7 @@ when false:
 
 proc peek*[T](c: Chan[T]): int = peek(c.d)
 
-proc reset*[T](c: Chan[T], nonBlocking = true): bool =
+proc reset*[T](c: Chan[T], nonBlocking = true) =
   resetMpmc(c.d, nonBlocking)
 
 proc newChan*[T](elements = 30, overwrite = false): Chan[T] =
