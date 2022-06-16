@@ -93,4 +93,59 @@ suite "testing seq":
 
   test "seq[int] reset":
     var chan = newChan[seq[int]]()
-    # runBasicReset(chan, 10)
+    let count = 10
+    for i in 1..count:
+      let msg = @[i, i, i]
+      logger.log(lvlDebug, "[main] Send msg: " & $msg)
+      chan.send(msg)
+
+    check chan.peek() == count
+    chan.clear()
+    check chan.peek() == 0
+
+suite "testing ref obj":
+
+  type TestObj = ref object
+    field: int
+  
+  setup:
+    discard "run before each test"
+
+  test "ref obj send recv":
+    var chan = newChan[TestObj]()
+    let count = 100
+    var dest: TestObj
+    for i in 1..count:
+      let msg = TestObj(field: i)
+      logger.log(lvlDebug, "[main] Send msg: " & repr msg)
+      chan.send(msg)
+      chan.recv(dest)
+    logger.log(lvlDebug, "[main] Received msg: " & repr dest)
+    doAssert dest.field == count
+
+  test "ref obj send recvAll":
+    var chan = newChan[TestObj]()
+    let count = 10
+    for i in 1..count:
+      let msg = TestObj(field: i)
+      logger.log(lvlDebug, "[main] Send msg: " & repr msg)
+      chan.send(msg)
+
+    var dest: seq[TestObj]
+    chan.recvAll(dest)
+    logger.log(lvlDebug, "[main] Received msg: " & repr dest)
+    doAssert dest.len() == count
+    doAssert dest[^1].field == count
+    doAssert dest.len() == count
+
+  test "ref obj reset":
+    var chan = newChan[TestObj]()
+    let count = 10
+    for i in 1..count:
+      let msg = TestObj(field: i)
+      logger.log(lvlDebug, "[main] Send msg: " & repr msg)
+      chan.send(msg)
+
+    check chan.peek() == count
+    chan.clear()
+    check chan.peek() == 0
