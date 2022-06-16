@@ -128,7 +128,7 @@ template isFull(chan: ChannelRaw): bool =
 template isEmpty(chan: ChannelRaw): bool =
   chan.head == chan.tail
 
-template reset(chan: ChannelRaw) =
+template clear(chan: ChannelRaw) =
   chan.head = chan.tail
   assert chan.isEmpty() and chan.numItems() == 0
 
@@ -334,7 +334,7 @@ proc clearMpmc(chan: ChannelRaw, nonBlocking: bool) =
 
   acquire(chan.lock)
 
-  chan.reset()
+  chan.clear()
 
   release(chan.lock)
   signal(chan.notFullCond)

@@ -43,7 +43,7 @@ template runBasicReset*[T](chan: Chan[T], count: int) =
     chan.send(msg)
 
   check chan.peek() == count
-  chan.reset()
+  chan.clear()
   check chan.peek() == 0
 
 template runMultithreadInOrderTest*[T](chan: Chan[T]) =

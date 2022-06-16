@@ -37,6 +37,18 @@ suite "testing Chan with overwrite mode":
     logger.log(lvlDebug, "got messages: " & $messages)
     check messages == @["msg7", "msg8", "msg9", "msg10"]
 
+  test "simple send recv":
+    var chan = newChan[string](overwrite=true)
+    runBasicSendRecv(chan)
+
+  test "simple send recvAll":
+    var chan = newChan[string](overwrite=true)
+    runBasicSendRecvAll(chan, 10)
+
+  test "simple reset":
+    var chan = newChan[string](overwrite=true)
+    runBasicReset(chan, 10)
+
   test "basic overwrite tests":
     var chan = newChan[string](elements = 4, overwrite = true)
     runMultithreadInOrderTest(chan)
