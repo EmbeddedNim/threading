@@ -4,7 +4,7 @@ discard """
 """
 
 import threading/channels
-import std/[os, logging, unittest]
+import std/[os, logging, unittest, isolation]
 import common
 
 
@@ -116,9 +116,9 @@ suite "testing ref obj":
     let count = 100
     var dest: TestObj
     for i in 1..count:
-      let msg = TestObj(field: i)
-      logger.log(lvlDebug, "[main] Send msg: " & repr msg)
-      chan.send(msg)
+      var msg = isolate(TestObj(field: i))
+      # logger.log(lvlDebug, "[main] Send msg: " & repr msg)
+      chan.send(move msg)
       chan.recv(dest)
     logger.log(lvlDebug, "[main] Received msg: " & repr dest)
     doAssert dest.field == count
@@ -127,9 +127,9 @@ suite "testing ref obj":
     var chan = newChan[TestObj]()
     let count = 10
     for i in 1..count:
-      let msg = TestObj(field: i)
+      var msg = TestObj(field: i)
       logger.log(lvlDebug, "[main] Send msg: " & repr msg)
-      chan.send(msg)
+      chan.send(msg.unsafeIsolate()) # if we know it's isolated
 
     var dest: seq[TestObj]
     chan.recvAll(dest)
@@ -142,9 +142,7 @@ suite "testing ref obj":
     var chan = newChan[TestObj]()
     let count = 10
     for i in 1..count:
-      let msg = TestObj(field: i)
-      logger.log(lvlDebug, "[main] Send msg: " & repr msg)
-      chan.send(msg)
+      chan.send(TestObj(field: i))
 
     check chan.peek() == count
     chan.clear()
