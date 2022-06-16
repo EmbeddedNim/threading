@@ -128,6 +128,10 @@ template isFull(chan: ChannelRaw): bool =
 template isEmpty(chan: ChannelRaw): bool =
   chan.head == chan.tail
 
+template reset(chan: ChannelRaw) =
+  chan.head = chan.tail
+  assert chan.isEmpty() and chan.numItems() == 0
+
 # Unbuffered / synchronous channels
 # ----------------------------------------------------------------------------------
 
@@ -322,6 +326,20 @@ proc recvMpmc(chan: ChannelRaw, data: pointer, size: int, nonBlocking: bool): bo
   result = true
 
 
+proc resetMpmc(chan: ChannelRaw, nonBlocking: bool): bool =
+  assert not chan.isNil
+
+  if nonBlocking and chan.isEmpty:
+    return true
+
+  acquire(chan.lock)
+
+  chan.reset()
+
+  release(chan.lock)
+  signal(chan.notFullCond)
+  result = true
+
 # Public API
 # ----------------------------------------------------------------------------------
 
@@ -417,6 +435,9 @@ when false:
     store(c.d.closed, true, moRelaxed)
 
 proc peek*[T](c: Chan[T]): int = peek(c.d)
+
+proc reset*[T](c: Chan[T], nonBlocking = true): bool =
+  resetMpmc(c.d, nonBlocking)
 
 proc newChan*[T](elements = 30, overwrite = false): Chan[T] =
   ## create a new channel implemented using a ring buffer
