@@ -326,7 +326,7 @@ proc recvMpmc(chan: ChannelRaw, data: pointer, size: int, nonBlocking: bool): bo
   result = true
 
 
-proc resetMpmc(chan: ChannelRaw, nonBlocking: bool) =
+proc clearMpmc(chan: ChannelRaw, nonBlocking: bool) =
   assert not chan.isNil
 
   if nonBlocking and chan.isEmpty:
@@ -435,8 +435,8 @@ when false:
 
 proc peek*[T](c: Chan[T]): int = peek(c.d)
 
-proc reset*[T](c: Chan[T], nonBlocking = true) =
-  resetMpmc(c.d, nonBlocking)
+proc clear*[T](c: Chan[T], nonBlocking = true) =
+  clearMpmc(c.d, nonBlocking)
 
 proc newChan*[T](elements = 30, overwrite = false): Chan[T] =
   ## create a new channel implemented using a ring buffer
